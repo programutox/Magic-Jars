@@ -1,0 +1,12 @@
+jar 0 0 128 128
+jar_broken 128 0 128 128
+star 256 0 128 128
+statue 384 0 128 128
+key 0 128 64 64
+snake 64 128 64 64
+sound 128 128 64 64
+back 192 128 32 32
+finger 224 128 32 32
+empty_heart 256 128 42 40
+heart 298 128 42 40
+cave 0 192 800 600
