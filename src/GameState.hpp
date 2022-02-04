@@ -19,6 +19,7 @@ namespace chap
         void MixJars();
 
         void GoToNextRound();
+        void HandleKeysForDebug();
 
         void Update() override;
         void Draw() override;

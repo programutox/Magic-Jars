@@ -53,25 +53,22 @@ namespace chap
         {
             ++m_round;
             Random::shuffle(m_texturesName);
+            return;
         }
-        else
+        
+        m_round = 1;
+        if (m_part + 1 <= s_partMax)
         {
-            m_round = 1;
-            if (m_part + 1 <= s_partMax)
-            {
-                ++m_part;
-                this->MixJars();
-            }
-            else
-            {
-                m_states.emplace(std::make_unique<WinState>(m_window, m_states, m_assetsManager, m_soundOn));
-            }
+            ++m_part;
+            this->MixJars();
+            return;
         }
+
+        m_states.emplace(std::make_unique<WinState>(m_window, m_states, m_assetsManager, m_soundOn));
     }
 
-    void GameState::Update()
+    void GameState::HandleKeysForDebug()
     {
-#if 0 // This part is used to debug the game
         if (IsKeyPressed(KEY_LEFT))
         {
             if (IsKeyDown(KEY_LEFT_SHIFT))
@@ -100,12 +97,22 @@ namespace chap
                 ++m_part;
             }
         }
-#endif
-        
+    }
+
+    void GameState::Update()
+    {
+        #if 0 // This part is used to debug the game
+            this->HandleKeysForDebug();
+        #endif
+
         if (m_jarContentIndex == -1)
         {
             m_assetsManager.GetButton("back_button").UpdateAlpha();
-            if (m_assetsManager.GetButton("back_button").IsClicked())
+            if (m_assetsManager.GetButton("back_button").IsClicked()
+                #if !defined(PLATFORM_WEB)
+                    || IsKeyPressed(KEY_ESCAPE)
+                #endif
+            )
             {
                 m_states.pop();
                 return;
@@ -124,25 +131,26 @@ namespace chap
         }
         else if (m_jarContentIndex != -1 && m_clock.GetElapsedTime() > 1.0)
         {
-            bool snake{ m_texturesName[m_jarContentIndex] == "snake" };
+            const bool snake{ m_texturesName[m_jarContentIndex] == "snake" };
             m_jarContentIndex = -1;
 
-            if (snake)
-            {
-                --m_lives;
-                if (m_lives == 0)
-                {
-                    if (m_soundOn)
-                    {
-                        m_assetsManager.GetSound("lose").Play();
-                    }
-                    m_states.pop();
-                }
-            }
-            else
+            if (!snake)
             {
                 this->GoToNextRound();
+                return;
             }
+
+            --m_lives;
+            if (m_lives > 0)
+            {
+                return;
+            }
+
+            if (m_soundOn)
+            {
+                m_assetsManager.GetSound("lose").Play();
+            }
+            m_states.pop();
         }
     }
 
